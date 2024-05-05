@@ -1,21 +1,75 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        
-        <meta charset="UTF-8">
-        <title>Image Application</title> 
-        
-        <link rel="stylesheet" href="./style.css"> 
-    </head>
-    <body>
-        <h1>Image Application</h1>
-        <div class="container">
-            
-            <input type="text" class="input" placeholder="Search for Images"/>
-            <button class="search_btn">Search</button>
-            <div class="display_images"></div>
-        </div>
-        
-        <script src="./main.js"></script>
-    </body>
+<head>
+  <meta charset="UTF-8">
+  <title>Image Application</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.16/tailwind.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <h1 class="text-3xl font-bold text-center py-8">Image Application</h1>
+  <div class="container mx-auto max-w-3xl bg-white rounded-lg shadow-md p-6">
+    <input type="text" class="input rounded-lg px-4 py-2 bg-gray-200 w-2/3 mx-auto block mb-4" placeholder="Search for Images" />
+    <button class="search_btn bg-green-500 text-white px-4 py-2 rounded-lg mx-auto block">Search</button>
+    <div class="display_images grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8"></div>
+  </div>
+  <script>
+    const apiKey = "563492ad6f917000010000019b983f3b62fe43daa92e746d4553dd35";
+    const input = document.querySelector("input");
+    const searchBtn = document.querySelector(".search_btn");
+    let page_num = 1;
+    let search_text = "";
+    let search = false;
+
+    input.addEventListener("input", (event) => {
+      event.preventDefault();
+      search_text = event.target.value;
+    });
+
+    searchBtn.addEventListener("click", () => {
+      if (input.value === "") {
+        alert("Please enter some text");
+        return;
+      }
+      clearGallery();
+      search = true;
+      SearchPhotos(search_text, page_num);
+    });
+
+    function clearGallery() {
+      document.querySelector(".display_images").innerHTML = "";
+      page_num = 1;
+    }
+
+    function displayImages(response) {
+      response.photos.forEach((image) => {
+        const photo = document.createElement("div");
+        photo.classList.add("bg-white", "rounded-lg", "shadow-md", "p-4");
+        photo.innerHTML = `<img src=${image.src.large2x} class="w-full h-48 object-cover rounded-lg mb-2">
+                           <figcaption class="text-gray-700 font-semibold">${image.photographer}</figcaption>`;
+        document.querySelector(".display_images").appendChild(photo);
+      });
+    }
+
+    async function SearchPhotos(query, page_num) {
+      const data = await fetch(`https://api.pexels.com/v1/search?query=${query}&page=${page_num}`, {
+        method: "GET",
+        headers: {
+          Authorization: apiKey,
+        },
+      });
+      const response = await data.json();
+      console.log(response);
+      displayImages(response);
+    }
+
+    SearchPhotos(search_text, page_num);
+  </script>
+</body>
 </html>
